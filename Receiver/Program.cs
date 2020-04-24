@@ -13,7 +13,8 @@ namespace Receiver
             var connectionString = args[0];
             var queueName = "queue1";
             var queueClient = new QueueClient(connectionString, queueName);
-            queueClient.RegisterMessageHandler(OnMessage, OnException);
+            var messageHandlerOptions = new MessageHandlerOptions(OnException);
+            queueClient.RegisterMessageHandler(OnMessage, messageHandlerOptions);
             Console.WriteLine("Listening, press any key");
             Console.ReadKey();
         }
