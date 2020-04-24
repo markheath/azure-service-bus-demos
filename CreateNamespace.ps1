@@ -5,6 +5,9 @@ $location = "westeurope"
 
 az group create -n $resourceGroup -l $location
 
+# if already created, find out the name with 
+$namespaceName = az servicebus namespace list -g $resourceGroup --query [].name -o tsv
+
 # generate a random unique name
 $namespaceName = "marksb$(Get-Random 10000)"
 az servicebus namespace create -g $resourceGroup `
@@ -16,8 +19,11 @@ az servicebus queue create -g $resourceGroup `
     --namespace-name $namespaceName -n $queueName
 
 # get hold of the connection string
-az servicebus namespace authorization-rule keys list `
+$connectionString = az servicebus namespace authorization-rule keys list `
     -g $resourceGroup --namespace-name $namespaceName `
     -n RootManageSharedAccessKey `
     --query primaryConnectionString `
     --output tsv
+
+dotnet user-secrets init
+dotnet user-secrets set ServiceBusConnectionString $connectionString

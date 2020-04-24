@@ -7,6 +7,16 @@ code .
 dotnet add package Microsoft.Azure.ServiceBus
 ```
 
+### Step 2 - Sending a message
+
+```cs
+```
+
+```
+dotnet run $connectionString "hello world"
+```
+
+
 ### Useful documentation
 
 - [Azure Service Bus Docs](https://docs.microsoft.com/en-gb/azure/service-bus-messaging/)
