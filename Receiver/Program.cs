@@ -8,7 +8,7 @@ namespace Receiver
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var connectionString = args[0];
             var queueName = "queue1";
@@ -17,6 +17,7 @@ namespace Receiver
             queueClient.RegisterMessageHandler(OnMessage, messageHandlerOptions);
             Console.WriteLine("Listening, press any key");
             Console.ReadKey();
+            await queueClient.CloseAsync();
         }
 
         static Task OnMessage(Message m, CancellationToken ct)

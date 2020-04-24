@@ -17,6 +17,7 @@ namespace Sender
             var message= new Message(body);
             await queueClient.SendAsync(message);
             Console.WriteLine("Sent message");
+            await queueClient.CloseAsync();
         }
     }
 }
