@@ -1,3 +1,5 @@
+Azure Service Bus demos to accompany the [blog series at markheath.net](https://markheath.net/post/azure-service-bus-messaging-1)
+
 ### Step 1 - creating the project
 ```
 md servicebus

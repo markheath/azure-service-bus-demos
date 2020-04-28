@@ -14,7 +14,11 @@ namespace Sender
             var queueClient = new QueueClient(connectionString, queueName);
             var messageText = args[1];
             var body = Encoding.UTF8.GetBytes(messageText);
-            var message= new Message(body);
+            var message = new Message(body);
+            message.CorrelationId = Guid.NewGuid().ToString();
+            message.Label = "My message";
+            message.UserProperties["Sender"] = "Mark";
+            message.ScheduledEnqueueTimeUtc = DateTime.UtcNow.AddMinutes(5);
             await queueClient.SendAsync(message);
             Console.WriteLine("Sent message");
             await queueClient.CloseAsync();

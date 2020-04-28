@@ -25,7 +25,16 @@ namespace Receiver
             var messageText = Encoding.UTF8.GetString(m.Body);
             Console.WriteLine("Got a message:");
             Console.WriteLine(messageText);
+            
             Console.WriteLine($"Enqueued at {m.SystemProperties.EnqueuedTimeUtc}");
+            Console.WriteLine($"CorrelationId: {m.CorrelationId}"); // not filled in for you
+            Console.WriteLine($"ContentType: {m.ContentType}"); // not filled in for you
+            Console.WriteLine($"Label: {m.Label}"); // not filled in for you
+            Console.WriteLine($"MessageId: {m.MessageId}"); // used for deduplication - is provided for you
+            foreach(var prop in m.UserProperties)
+            {
+                Console.WriteLine($"{prop.Key}={prop.Value}");
+            }
             return Task.CompletedTask;
         }
 
