@@ -14,14 +14,17 @@ namespace Receiver
             var queueName = "queue1";
             var queueClient = new QueueClient(connectionString, queueName);
             var messageHandlerOptions = new MessageHandlerOptions(OnException);
+            messageHandlerOptions.MaxConcurrentCalls = 4;
+            Console.WriteLine($"{messageHandlerOptions.AutoComplete},{messageHandlerOptions.MaxAutoRenewDuration},{messageHandlerOptions.MaxConcurrentCalls}");
             queueClient.RegisterMessageHandler(OnMessage, messageHandlerOptions);
             Console.WriteLine("Listening, press any key");
             Console.ReadKey();
             await queueClient.CloseAsync();
         }
 
-        static Task OnMessage(Message m, CancellationToken ct)
+        static async Task OnMessage(Message m, CancellationToken ct)
         {
+            
             var messageText = Encoding.UTF8.GetString(m.Body);
             Console.WriteLine("Got a message:");
             Console.WriteLine(messageText);
@@ -35,14 +38,29 @@ namespace Receiver
             {
                 Console.WriteLine($"{prop.Key}={prop.Value}");
             }
-            return Task.CompletedTask;
+
+            if (messageText.ToLower().Contains("sleep"))
+            {
+                await Task.Delay(5000);
+            }
+            
+            if (messageText.ToLower().Contains("error"))
+            {
+                throw new InvalidOperationException("something went wrong handling this message");
+            }
+
+            Console.WriteLine($"Finished processing: {messageText}");
+            
         }
 
         static Task OnException(ExceptionReceivedEventArgs args)
         {
             Console.WriteLine("Got an exception:");
             Console.WriteLine(args.Exception.Message);
-            Console.WriteLine(args.ExceptionReceivedContext.ToString());
+            Console.WriteLine(args.ExceptionReceivedContext.Action);
+            Console.WriteLine(args.ExceptionReceivedContext.ClientId);
+            Console.WriteLine(args.ExceptionReceivedContext.Endpoint);
+            Console.WriteLine(args.ExceptionReceivedContext.EntityPath);
             return Task.CompletedTask;
         }
     }

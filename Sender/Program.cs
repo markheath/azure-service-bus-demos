@@ -18,7 +18,10 @@ namespace Sender
             message.CorrelationId = Guid.NewGuid().ToString();
             message.Label = "My message";
             message.UserProperties["Sender"] = "Mark";
-            message.ScheduledEnqueueTimeUtc = DateTime.UtcNow.AddMinutes(5);
+            if (messageText.ToLower().Contains("delay"))
+            {
+                message.ScheduledEnqueueTimeUtc = DateTime.UtcNow.AddMinutes(5);
+            }
             await queueClient.SendAsync(message);
             Console.WriteLine("Sent message");
             await queueClient.CloseAsync();
