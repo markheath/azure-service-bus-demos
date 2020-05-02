@@ -18,6 +18,20 @@ $queueName = "queue1"
 az servicebus queue create -g $resourceGroup `
     --namespace-name $namespaceName -n $queueName
 
+#create a topic
+$topicName = "topic1"
+az servicebus topic create -g $resourceGroup `
+    --namespace-name $namespaceName -n $topicName
+
+az servicebus topic subscription create -g $resourceGroup `
+    --namespace-name $namespaceName `
+    --topic-name $topicName -n "subscription1"
+
+az servicebus topic subscription create -g $resourceGroup `
+    --namespace-name $namespaceName `
+    --topic-name $topicName -n "subscription2"
+
+
 # get hold of the connection string
 $connectionString = az servicebus namespace authorization-rule keys list `
     -g $resourceGroup --namespace-name $namespaceName `

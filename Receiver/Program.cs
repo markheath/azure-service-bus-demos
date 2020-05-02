@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.ServiceBus;
+using Microsoft.Azure.ServiceBus.Core;
 
 namespace Receiver
 {
@@ -10,16 +11,53 @@ namespace Receiver
     {
         static async Task Main(string[] args)
         {
-            var connectionString = args[0];
-            var queueName = "queue1";
-            var queueClient = new QueueClient(connectionString, queueName);
+            string connectionString = null;
+            string queueName = "queue1";
+            string subscriptionName = null;
+            string topicName = null;
+            for(int n = 0; n < args.Length; n++)
+            {
+                switch(args[n])
+                {
+                    case "-c":
+                        connectionString = args[++n];
+                        break;
+                    case "-q":
+                        queueName = args[++n];
+                        break;
+                    case "-t":
+                        topicName = args[++n];
+                        break;
+                    case "-s":
+                        subscriptionName = args[++n];
+                        break;
+                    default:
+                        ShowHelp();
+                        return;
+                }
+            }
+            if (connectionString  == null)
+            {
+                ShowHelp();
+                return;
+            }
+
+            IReceiverClient listenerClient;
+            if (topicName != null)
+            {
+                listenerClient = new SubscriptionClient(connectionString, topicName, subscriptionName);
+            }
+            else
+            {
+                listenerClient = new QueueClient(connectionString, queueName);
+            }
             var messageHandlerOptions = new MessageHandlerOptions(OnException);
             messageHandlerOptions.MaxConcurrentCalls = 4;
             Console.WriteLine($"{messageHandlerOptions.AutoComplete},{messageHandlerOptions.MaxAutoRenewDuration},{messageHandlerOptions.MaxConcurrentCalls}");
-            queueClient.RegisterMessageHandler(OnMessage, messageHandlerOptions);
-            Console.WriteLine("Listening, press any key");
+            listenerClient.RegisterMessageHandler(OnMessage, messageHandlerOptions);
+            Console.WriteLine($"Listening on {listenerClient.Path}, press any key");
             Console.ReadKey();
-            await queueClient.CloseAsync();
+            await listenerClient.CloseAsync();
         }
 
         static async Task OnMessage(Message m, CancellationToken ct)
@@ -62,6 +100,16 @@ namespace Receiver
             Console.WriteLine(args.ExceptionReceivedContext.Endpoint);
             Console.WriteLine(args.ExceptionReceivedContext.EntityPath);
             return Task.CompletedTask;
+        }
+
+                private static void ShowHelp()
+        {
+            Console.WriteLine("Usage: dotnet run [options]");
+            Console.WriteLine("Options:");
+            Console.WriteLine("-c connectionString [required]");
+            Console.WriteLine("-q queueName [default is queue1]");
+            Console.WriteLine("-s subscriptionName [alternative to listening on a queue]");
+            Console.WriteLine("-t topicName [required if listening to topic instead of queue]");
         }
     }
 }
